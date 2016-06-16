@@ -1,4 +1,4 @@
-﻿namespace WinTail
+﻿namespace WinTail.Actors
 {
     using System;
     using Akka.Actor;

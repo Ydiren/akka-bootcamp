@@ -1,4 +1,4 @@
-namespace WinTail
+namespace WinTail.Actors
 {
     using System;
     using Akka.Actor;
@@ -54,16 +54,34 @@ namespace WinTail
         private void GetAndValidateInput()
         {
             var message = Console.ReadLine();
-            if (!string.IsNullOrEmpty(message) && string.Equals(message, ExitCommand, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(message))
             {
-                // If user typed ExitCommand, shut down the entire actor
-                // system (allows the process to exit)
-                Context.System.Shutdown();
-                return;
+                Self.Tell(new NullInputError("No input received."));
             }
+            else if (string.Equals(message, ExitCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                Context.System.Shutdown();
+            }
+            else
+            {
+                var valid = IsValid(message);
+                if (valid)
+                {
+                    validationActor.Tell(new InputSuccess("Thank you! Message was valid."));
 
-            // Otherwise, just hand message off to validation actor
-            validationActor.Tell(message);
+                    // Continue reading messages from console
+                    Self.Tell(new ContinueProcessing());
+                }
+                else
+                {
+                    Self.Tell(new ValidationError("Invalid: Input had odd number of characters."));
+                }
+            }
+        }
+
+        private bool IsValid(string message)
+        {
+            return message.Length % 2 == 0;
         }
     }
 }
