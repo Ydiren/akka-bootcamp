@@ -55,8 +55,9 @@
   <ItemGroup>
     <Compile Include="Actors\ConsoleReaderActor.cs" />
     <Compile Include="Actors\ConsoleWriterActor.cs" />
-    <Compile Include="ConsoleReaderActor.cs" />
-    <Compile Include="ConsoleWriterActor.cs" />
+    <Compile Include="Actors\TailActor.cs" />
+    <Compile Include="Actors\TailCoordinatorActor.cs" />
+    <Compile Include="FileObserver.cs" />
     <Compile Include="Messages\Error\InputError.cs" />
     <Compile Include="Messages\Error\NullInputError.cs" />
     <Compile Include="Messages\Error\ValidationError.cs" />
@@ -64,7 +65,7 @@
     <Compile Include="Messages\Success\InputSuccess.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ValidationActor.cs" />
+    <Compile Include="Actors\FileValidatorActor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

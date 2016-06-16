@@ -3,8 +3,6 @@ namespace WinTail.Actors
     using System;
     using Akka.Actor;
     using Messages.Error;
-    using Messages.Neutral;
-    using Messages.Success;
 
     /// <summary>
     ///     Actor responsible for reading FROM the console.
@@ -37,51 +35,22 @@ namespace WinTail.Actors
 
         private void DoPrintInstructions()
         {
-            Console.WriteLine("Write whatever you want into the console!");
-            Console.Write("Some lines will appear as");
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.Write(" red ");
-            Console.ResetColor();
-            Console.Write(" and others will appear as");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(" green! ");
-            Console.ResetColor();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("Type 'exit' to quit this application at any time.\n");
+            Console.WriteLine("Please provide the URI of a log file on disk.\n");
         }
 
         private void GetAndValidateInput()
         {
             var message = Console.ReadLine();
-            if (string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message) && string.Equals(message, ExitCommand, StringComparison.OrdinalIgnoreCase))
             {
-                Self.Tell(new NullInputError("No input received."));
-            }
-            else if (string.Equals(message, ExitCommand, StringComparison.OrdinalIgnoreCase))
-            {
+                // If user typed ExitCommand, shut down the entire actor
+                // system (allows the process to exit)
                 Context.System.Shutdown();
+                return;
             }
-            else
-            {
-                var valid = IsValid(message);
-                if (valid)
-                {
-                    validationActor.Tell(new InputSuccess("Thank you! Message was valid."));
 
-                    // Continue reading messages from console
-                    Self.Tell(new ContinueProcessing());
-                }
-                else
-                {
-                    Self.Tell(new ValidationError("Invalid: Input had odd number of characters."));
-                }
-            }
-        }
-
-        private bool IsValid(string message)
-        {
-            return message.Length % 2 == 0;
+            // Otherwise, just hand message off to validation actor
+            validationActor.Tell(message);
         }
     }
 }
