@@ -25,7 +25,10 @@ namespace WinTail.Actors
 
         private void DoPrintInstructions()
         {
-            Console.WriteLine("Please provide the URI of a log file on disk.\n");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine("Please provide the URI of a log file on disk.");
+            Console.WriteLine();
         }
 
         private void GetAndValidateInput()

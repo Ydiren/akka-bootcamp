@@ -11,28 +11,15 @@
     class TailActor : UntypedActor
     {
         private readonly string filePath;
-        private readonly FileStream fileStream;
-        private readonly FileObserver observer;
         private readonly IActorRef reporterActor;
-        private readonly StreamReader fileStreamReader;
+        private FileStream fileStream;
+        private FileObserver observer;
+        private StreamReader fileStreamReader;
 
         public TailActor(IActorRef reporterActor, string filePath)
         {
             this.reporterActor = reporterActor;
             this.filePath = filePath;
-
-            // Start watching file for changes
-            observer = new FileObserver(Self, Path.GetFullPath(filePath));
-            observer.Start();
-
-            // Open the file stream with shared read/write permissions
-            // (so the file can be written to while open)
-            fileStream = new FileStream(Path.GetFullPath(filePath), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            fileStreamReader = new StreamReader(fileStream, Encoding.UTF8);
-
-            // Read the initial contents of the file and send it to console as first msg
-            var text = fileStreamReader.ReadToEnd();
-            Self.Tell(new InitialRead(filePath, text));
         }
 
         protected override void OnReceive(object message)
@@ -58,6 +45,38 @@
                 var initialRead = message as InitialRead;
                 reporterActor.Tell(initialRead.Text);
             }
+        }
+
+        /// <summary>
+        /// Cleanup OS handles for <see cref="fileStreamReader"/> 
+        /// and <see cref="FileObserver"/>
+        /// </summary>
+        protected override void PostStop()
+        {
+            observer.Dispose();
+            observer = null;
+
+            fileStreamReader.Close();
+            fileStreamReader.Dispose();
+            fileStreamReader = null;
+
+            base.PostStop();
+        }
+
+        protected override void PreStart()
+        {
+            // Start watching file for changes
+            observer = new FileObserver(Self, Path.GetFullPath(filePath));
+            observer.Start();
+
+            // Open the file stream with shared read/write permissions
+            // (so the file can be written to while open)
+            fileStream = new FileStream(Path.GetFullPath(filePath), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            fileStreamReader = new StreamReader(fileStream, Encoding.UTF8);
+
+            // Read the initial contents of the file and send it to console as first msg
+            var text = fileStreamReader.ReadToEnd();
+            Self.Tell(new InitialRead(filePath, text));
         }
 
         /// <summary>
