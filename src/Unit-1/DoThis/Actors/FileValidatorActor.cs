@@ -12,12 +12,10 @@
     public class FileValidatorActor : UntypedActor
     {
         private readonly IActorRef consoleWriterActor;
-        private readonly IActorRef tailCoordinatorActor;
 
-        public FileValidatorActor(IActorRef consoleWriterActor, IActorRef tailCoordinatorActor)
+        public FileValidatorActor(IActorRef consoleWriterActor)
         {
             this.consoleWriterActor = consoleWriterActor;
-            this.tailCoordinatorActor = tailCoordinatorActor;
         }
 
         protected override void OnReceive(object message)
@@ -27,7 +25,6 @@
             if (string.IsNullOrEmpty(msg))
             {
                 // Signal that the user needs to supply an input
-
                 consoleWriterActor.Tell(new NullInputError("Input was blank. Please try again.\n"));
 
                 // Tell the sender to continue doing its thing (whaterver that may be, this actor doesn't care)
@@ -42,7 +39,8 @@
                     consoleWriterActor.Tell(new InputSuccess($"Starting processing for {msg}"));
 
                     // Start coordinator
-                    tailCoordinatorActor.Tell(new TailCoordinatorActor.StartTail(msg, consoleWriterActor));
+                    Context.ActorSelection("akka://MyActorSystem/user/tailCoordinatorActor")
+                           .Tell(new TailCoordinatorActor.StartTail(msg, consoleWriterActor));
                 }
                 else
                 {

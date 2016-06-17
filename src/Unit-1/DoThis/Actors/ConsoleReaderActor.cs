@@ -12,22 +12,12 @@ namespace WinTail.Actors
     {
         public const string StartCommand = "start";
         public const string ExitCommand = "exit";
-        private readonly IActorRef validationActor;
-
-        public ConsoleReaderActor(IActorRef validationActor)
-        {
-            this.validationActor = validationActor;
-        }
 
         protected override void OnReceive(object message)
         {
             if (message.Equals(StartCommand))
             {
                 DoPrintInstructions();
-            }
-            else if (message is InputError)
-            {
-                validationActor.Tell(message as InputError);
             }
 
             GetAndValidateInput();
@@ -50,7 +40,7 @@ namespace WinTail.Actors
             }
 
             // Otherwise, just hand message off to validation actor
-            validationActor.Tell(message);
+            Context.ActorSelection("akka://MyActorSystem/user/validationActor").Tell(message);
         }
     }
 }

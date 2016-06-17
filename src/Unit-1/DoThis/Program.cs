@@ -4,8 +4,6 @@
     using Actors;
     using Akka.Actor;
 
-    #region Program
-
     class Program
     {
         public static ActorSystem MyActorSystem;
@@ -22,10 +20,10 @@
             var tailCoordinatorProps = Props.Create(() => new TailCoordinatorActor());
             var tailCoordinatorActor = MyActorSystem.ActorOf(tailCoordinatorProps, "tailCoordinatorActor");
 
-            var fileValidatorProps = Props.Create(() => new FileValidatorActor(consoleWriterActor, tailCoordinatorActor));
+            var fileValidatorProps = Props.Create(() => new FileValidatorActor(consoleWriterActor));
             var fileValidatorActor = MyActorSystem.ActorOf(fileValidatorProps, "validationActor");
 
-            var consoleReaderProps = Props.Create(() => new ConsoleReaderActor(fileValidatorActor));
+            var consoleReaderProps = Props.Create(() => new ConsoleReaderActor());
             var consoleReaderActor = MyActorSystem.ActorOf(consoleReaderProps, "consoleReaderActor");
 
             // tell console reader to begin
@@ -35,6 +33,4 @@
             MyActorSystem.AwaitTermination();
         }
     }
-
-    #endregion
 }
