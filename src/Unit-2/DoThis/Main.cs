@@ -42,5 +42,11 @@
         }
 
         #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var series = ChartDataHelper.RandomSeries($"FakeSeries {seriesCounter.GetAndIncrement()}");
+            chartActor.Tell(new ChartingActor.AddSeries(series));
+        }
     }
 }
