@@ -1,22 +1,22 @@
-﻿using System;
-using System.Windows.Forms;
-using Akka.Actor;
-
-namespace ChartApp
+﻿namespace ChartApp
 {
-    static class Program
+    using System;
+    using System.Windows.Forms;
+    using Akka.Actor;
+
+    internal static class Program
     {
         /// <summary>
-        /// ActorSystem we'll be using to publish data to charts
-        /// and subscribe from performance counters
+        ///     ActorSystem we'll be using to publish data to charts
+        ///     and subscribe from performance counters
         /// </summary>
         public static ActorSystem ChartActors;
 
         /// <summary>
-        /// The main entry point for the application.
+        ///     The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             ChartActors = ActorSystem.Create("ChartActors");
             Application.EnableVisualStyles();

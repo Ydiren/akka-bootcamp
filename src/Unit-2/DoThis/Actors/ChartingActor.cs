@@ -1,38 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms.DataVisualization.Charting;
-using Akka.Actor;
-
-namespace ChartApp.Actors
+﻿namespace ChartApp.Actors
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Windows.Forms.DataVisualization.Charting;
+    using Akka.Actor;
+
     public class ChartingActor : UntypedActor
     {
-        #region Messages
+        private readonly Chart chart;
+        private Dictionary<string, Series> seriesIndex;
 
-        public class InitializeChart
-        {
-            public InitializeChart(Dictionary<string, Series> initialSeries)
-            {
-                InitialSeries = initialSeries;
-            }
-
-            public Dictionary<string, Series> InitialSeries { get; private set; }
-        }
-
-        #endregion
-
-        private readonly Chart _chart;
-        private Dictionary<string, Series> _seriesIndex;
-
-        public ChartingActor(Chart chart) : this(chart, new Dictionary<string, Series>())
+        public ChartingActor(Chart chart)
+            : this(chart, new Dictionary<string, Series>())
         {
         }
 
         public ChartingActor(Chart chart, Dictionary<string, Series> seriesIndex)
         {
-            _chart = chart;
-            _seriesIndex = seriesIndex;
+            this.chart = chart;
+            this.seriesIndex = seriesIndex;
         }
 
         protected override void OnReceive(object message)
@@ -51,22 +37,36 @@ namespace ChartApp.Actors
             if (ic.InitialSeries != null)
             {
                 //swap the two series out
-                _seriesIndex = ic.InitialSeries;
+                seriesIndex = ic.InitialSeries;
             }
 
             //delete any existing series
-            _chart.Series.Clear();
+            chart.Series.Clear();
 
             //attempt to render the initial chart
-            if (_seriesIndex.Any())
+            if (seriesIndex.Any())
             {
-                foreach (var series in _seriesIndex)
+                foreach (var series in seriesIndex)
                 {
                     //force both the chart and the internal index to use the same names
                     series.Value.Name = series.Key;
-                    _chart.Series.Add(series.Value);
+                    chart.Series.Add(series.Value);
                 }
             }
+        }
+
+        #endregion
+
+        #region Messages
+
+        public class InitializeChart
+        {
+            public InitializeChart(Dictionary<string, Series> initialSeries)
+            {
+                InitialSeries = initialSeries;
+            }
+
+            public Dictionary<string, Series> InitialSeries { get; }
         }
 
         #endregion
